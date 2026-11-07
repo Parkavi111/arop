@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, redirect, render_template, request
 
 from database import get_connection, init_db
 
@@ -8,7 +8,26 @@ init_db()
 
 @app.route("/")
 def home():
-    return "AROP is running"
+    return redirect("/robots")
+
+
+@app.route("/robots")
+def robots_page():
+    conn = get_connection()
+    robots = conn.execute("SELECT * FROM robots ORDER BY id").fetchall()
+    conn.close()
+    return render_template("robots.html", robots=robots)
+
+
+@app.route("/robots/add", methods=["POST"])
+def add_robot():
+    name = request.form.get("name", "").strip()
+    if name:
+        conn = get_connection()
+        conn.execute("INSERT INTO robots (name) VALUES (?)", (name,))
+        conn.commit()
+        conn.close()
+    return redirect("/robots")
 
 
 @app.route("/api/robots")

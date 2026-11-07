@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Robots - AROP{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-3">Robots</h1>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Status</th>
+      <th>Battery</th>
+      <th>Location</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for robot in robots %}
+    <tr>
+      <td>{{ robot.id }}</td>
+      <td>{{ robot.name }}</td>
+      <td>{{ robot.status }}</td>
+      <td>{{ robot.battery }}%</td>
+      <td>{{ robot.location }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2 class="h5 mt-4">Register a new robot</h2>
+<form method="post" action="/robots/add" class="row g-2">
+  <div class="col-auto">
+    <input type="text" name="name" class="form-control" placeholder="Robot name" required>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-dark">Add robot</button>
+  </div>
+</form>
+{% endblock %}
