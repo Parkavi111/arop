@@ -2,8 +2,10 @@ from flask import Flask, jsonify, redirect, render_template, request
 
 from database import get_connection, init_db
 from simulation import simulate_step
+from logs import logs_bp
 
 app = Flask(__name__)
+app.register_blueprint(logs_bp)
 init_db()
 
 VALID_PRIORITIES = ("low", "medium", "high")
