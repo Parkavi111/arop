@@ -6,6 +6,29 @@ app = Flask(__name__)
 init_db()
 
 VALID_PRIORITIES = ("low", "medium", "high")
+MIN_BATTERY = 20
+
+
+def assign_task(conn, task_id, robot_id):
+    task = conn.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
+    robot = conn.execute("SELECT * FROM robots WHERE id = ?", (robot_id,)).fetchone()
+    if task is None or robot is None:
+        return False
+    if task["status"] != "pending":
+        return False
+    if robot["status"] != "idle" or robot["battery"] < MIN_BATTERY:
+        return False
+    conn.execute(
+        "UPDATE tasks SET status = 'assigned', assigned_robot_id = ? WHERE id = ?",
+        (robot_id, task_id),
+    )
+    conn.execute("UPDATE robots SET status = 'busy' WHERE id = ?", (robot_id,))
+    conn.execute(
+        "INSERT INTO activity_logs (robot_id, task_id, event) VALUES (?, ?, ?)",
+        (robot_id, task_id, "Task assigned"),
+    )
+    conn.commit()
+    return True
 
 
 @app.route("/")
@@ -59,8 +82,14 @@ def tasks_page():
         ORDER BY tasks.id
         """
     ).fetchall()
+    available_robots = conn.execute(
+        "SELECT * FROM robots WHERE status = 'idle' AND battery >= ? ORDER BY id",
+        (MIN_BATTERY,),
+    ).fetchall()
     conn.close()
-    return render_template("tasks.html", tasks=tasks)
+    return render_template(
+        "tasks.html", tasks=tasks, available_robots=available_robots
+    )
 
 
 @app.route("/tasks/add", methods=["POST"])
@@ -76,6 +105,16 @@ def add_task():
             (title, priority),
         )
         conn.commit()
+        conn.close()
+    return redirect("/tasks")
+
+
+@app.route("/tasks/<int:task_id>/assign", methods=["POST"])
+def assign_task_route(task_id):
+    robot_id = request.form.get("robot_id", type=int)
+    if robot_id is not None:
+        conn = get_connection()
+        assign_task(conn, task_id, robot_id)
         conn.close()
     return redirect("/tasks")
 
