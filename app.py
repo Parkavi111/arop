@@ -31,6 +31,36 @@ def assign_task(conn, task_id, robot_id):
     return True
 
 
+def auto_allocate(conn):
+    assigned_count = 0
+    pending = conn.execute(
+        """
+        SELECT id FROM tasks
+        WHERE status = 'pending'
+        ORDER BY CASE priority
+                     WHEN 'high' THEN 1
+                     WHEN 'medium' THEN 2
+                     ELSE 3
+                 END, id
+        """
+    ).fetchall()
+    for task in pending:
+        robot = conn.execute(
+            """
+            SELECT id FROM robots
+            WHERE status = 'idle' AND battery >= ?
+            ORDER BY battery DESC, id
+            LIMIT 1
+            """,
+            (MIN_BATTERY,),
+        ).fetchone()
+        if robot is None:
+            break
+        if assign_task(conn, task["id"], robot["id"]):
+            assigned_count += 1
+    return assigned_count
+
+
 @app.route("/")
 def home():
     return redirect("/robots")
@@ -116,6 +146,14 @@ def assign_task_route(task_id):
         conn = get_connection()
         assign_task(conn, task_id, robot_id)
         conn.close()
+    return redirect("/tasks")
+
+
+@app.route("/tasks/auto-assign", methods=["POST"])
+def auto_assign_route():
+    conn = get_connection()
+    auto_allocate(conn)
+    conn.close()
     return redirect("/tasks")
 
 
