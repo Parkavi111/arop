@@ -32,6 +32,22 @@ def add_robot():
     return redirect("/robots")
 
 
+@app.route("/robots/<int:robot_id>/delete", methods=["POST"])
+def delete_robot(robot_id):
+    conn = get_connection()
+    has_tasks = conn.execute(
+        "SELECT 1 FROM tasks WHERE assigned_robot_id = ? LIMIT 1", (robot_id,)
+    ).fetchone()
+    has_logs = conn.execute(
+        "SELECT 1 FROM activity_logs WHERE robot_id = ? LIMIT 1", (robot_id,)
+    ).fetchone()
+    if not has_tasks and not has_logs:
+        conn.execute("DELETE FROM robots WHERE id = ?", (robot_id,))
+        conn.commit()
+    conn.close()
+    return redirect("/robots")
+
+
 @app.route("/tasks")
 def tasks_page():
     conn = get_connection()

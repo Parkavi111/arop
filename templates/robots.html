@@ -12,6 +12,7 @@
       <th>Status</th>
       <th>Battery</th>
       <th>Location</th>
+      <th>Action</th>
     </tr>
   </thead>
   <tbody>
@@ -22,6 +23,12 @@
       <td>{{ robot.status }}</td>
       <td>{{ robot.battery }}%</td>
       <td>{{ robot.location }}</td>
+      <td>
+        <form method="post" action="/robots/{{ robot.id }}/delete"
+              onsubmit="return confirm('Remove {{ robot.name }}?');">
+          <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+        </form>
+      </td>
     </tr>
     {% endfor %}
   </tbody>
