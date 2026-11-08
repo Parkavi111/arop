@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, redirect, render_template, request
 
 from database import get_connection, init_db
+from simulation import simulate_step
 
 app = Flask(__name__)
 init_db()
@@ -153,6 +154,14 @@ def assign_task_route(task_id):
 def auto_assign_route():
     conn = get_connection()
     auto_allocate(conn)
+    conn.close()
+    return redirect("/tasks")
+
+
+@app.route("/simulate/step", methods=["POST"])
+def simulate_step_route():
+    conn = get_connection()
+    simulate_step(conn)
     conn.close()
     return redirect("/tasks")
 
