@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Reports - AROP{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-3">Task Report</h1>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card bg-dark text-light h-100">
+      <div class="card-body">
+        <div class="text-secondary">Total tasks</div>
+        <div class="display-6">{{ total }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card bg-dark text-light h-100">
+      <div class="card-body">
+        <div class="text-secondary">Completed</div>
+        <div class="display-6">{{ completed }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card bg-dark text-light h-100">
+      <div class="card-body">
+        <div class="text-secondary">Completion rate</div>
+        <div class="display-6">{{ rate }}%</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    <h2 class="h5">Completed tasks per robot</h2>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Robot</th>
+          <th>Completed</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in per_robot %}
+        <tr>
+          <td>{{ row.name }}</td>
+          <td>{{ row.done }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="col-md-6">
+    <h2 class="h5">Tasks per priority</h2>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Priority</th>
+          <th>Total</th>
+          <th>Completed</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in per_priority %}
+        <tr>
+          <td>{{ row.priority }}</td>
+          <td>{{ row.total }}</td>
+          <td>{{ row.done }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{# end of reports.html #}

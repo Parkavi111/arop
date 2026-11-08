@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, redirect, render_template, request
+from reports import reports_bp
 
 from database import get_connection, init_db
 from simulation import simulate_step
@@ -8,6 +9,7 @@ from dashboard import dashboard_bp
 app = Flask(__name__)
 app.register_blueprint(logs_bp)
 app.register_blueprint(dashboard_bp)
+app.register_blueprint(reports_bp)
 init_db()
 
 VALID_PRIORITIES = ("low", "medium", "high")
