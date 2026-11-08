@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - AROP{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-3">Fleet Dashboard</h1>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card bg-dark text-light h-100">
+      <div class="card-body">
+        <div class="text-secondary">Robots</div>
+        <div class="display-6">{{ robots|length }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card bg-dark text-light h-100">
+      <div class="card-body">
+        <div class="text-secondary">Tasks</div>
+        <div class="display-6">{{ total_tasks }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card bg-dark text-light h-100">
+      <div class="card-body">
+        <div class="text-secondary">Average battery</div>
+        <div class="display-6">{{ avg_battery }}%</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <h2 class="h5">Robot status</h2>
+    <ul class="list-group">
+      <li class="list-group-item d-flex justify-content-between">
+        <span>Idle</span><span>{{ robot_counts.get("idle", 0) }}</span>
+      </li>
+      <li class="list-group-item d-flex justify-content-between">
+        <span>Busy</span><span>{{ robot_counts.get("busy", 0) }}</span>
+      </li>
+      <li class="list-group-item d-flex justify-content-between">
+        <span>Charging</span><span>{{ robot_counts.get("charging", 0) }}</span>
+      </li>
+    </ul>
+  </div>
+  <div class="col-md-6">
+    <h2 class="h5">Task status</h2>
+    <ul class="list-group">
+      <li class="list-group-item d-flex justify-content-between">
+        <span>Pending</span><span>{{ task_counts.get("pending", 0) }}</span>
+      </li>
+      <li class="list-group-item d-flex justify-content-between">
+        <span>Assigned</span><span>{{ task_counts.get("assigned", 0) }}</span>
+      </li>
+      <li class="list-group-item d-flex justify-content-between">
+        <span>In progress</span><span>{{ task_counts.get("in_progress", 0) }}</span>
+      </li>
+      <li class="list-group-item d-flex justify-content-between">
+        <span>Completed</span><span>{{ task_counts.get("completed", 0) }}</span>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<h2 class="h5">Battery levels</h2>
+{% for robot in robots %}
+<div class="mb-2">
+  <div class="d-flex justify-content-between">
+    <span>{{ robot.name }} ({{ robot.status }}, {{ robot.location }})</span>
+    <span>{{ robot.battery }}%</span>
+  </div>
+  <div class="progress">
+    <div class="progress-bar" style="width: {{ robot.battery }}%"></div>
+  </div>
+</div>
+{% endfor %}
+
+<h2 class="h5 mt-4">Recent activity</h2>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Time</th>
+      <th>Robot</th>
+      <th>Task</th>
+      <th>Event</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for log in recent %}
+    <tr>
+      <td>{{ log.timestamp }}</td>
+      <td>{{ log.robot_name or "-" }}</td>
+      <td>{{ log.task_title or "-" }}</td>
+      <td>{{ log.event }}</td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="4" class="text-secondary">No activity yet.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
+{# end of dashboard.html #}
