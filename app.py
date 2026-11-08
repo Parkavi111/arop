@@ -5,6 +5,8 @@ from database import get_connection, init_db
 app = Flask(__name__)
 init_db()
 
+VALID_PRIORITIES = ("low", "medium", "high")
+
 
 @app.route("/")
 def home():
@@ -28,6 +30,38 @@ def add_robot():
         conn.commit()
         conn.close()
     return redirect("/robots")
+
+
+@app.route("/tasks")
+def tasks_page():
+    conn = get_connection()
+    tasks = conn.execute(
+        """
+        SELECT tasks.*, robots.name AS robot_name
+        FROM tasks
+        LEFT JOIN robots ON tasks.assigned_robot_id = robots.id
+        ORDER BY tasks.id
+        """
+    ).fetchall()
+    conn.close()
+    return render_template("tasks.html", tasks=tasks)
+
+
+@app.route("/tasks/add", methods=["POST"])
+def add_task():
+    title = request.form.get("title", "").strip()
+    priority = request.form.get("priority", "medium")
+    if priority not in VALID_PRIORITIES:
+        priority = "medium"
+    if title:
+        conn = get_connection()
+        conn.execute(
+            "INSERT INTO tasks (title, priority) VALUES (?, ?)",
+            (title, priority),
+        )
+        conn.commit()
+        conn.close()
+    return redirect("/tasks")
 
 
 @app.route("/api/robots")

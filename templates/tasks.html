@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Tasks - AROP{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-3">Tasks</h1>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Title</th>
+      <th>Priority</th>
+      <th>Status</th>
+      <th>Assigned robot</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for task in tasks %}
+    <tr>
+      <td>{{ task.id }}</td>
+      <td>{{ task.title }}</td>
+      <td>{{ task.priority }}</td>
+      <td>{{ task.status }}</td>
+      <td>{{ task.robot_name or "-" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2 class="h5 mt-4">Create a new task</h2>
+<form method="post" action="/tasks/add" class="row g-2">
+  <div class="col-auto">
+    <input type="text" name="title" class="form-control" placeholder="Task title" required>
+  </div>
+  <div class="col-auto">
+    <select name="priority" class="form-select">
+      <option value="low">low</option>
+      <option value="medium" selected>medium</option>
+      <option value="high">high</option>
+    </select>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-dark">Add task</button>
+  </div>
+</form>
+{% endblock %}
