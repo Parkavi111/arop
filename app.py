@@ -1,12 +1,14 @@
 from flask import Flask, jsonify, redirect, render_template, request
-from reports import reports_bp
 
-from database import get_connection, init_db
-from simulation import simulate_step
-from logs import logs_bp
+from auth import init_auth
 from dashboard import dashboard_bp
+from database import get_connection, init_db
+from logs import logs_bp
+from reports import reports_bp
+from simulation import simulate_step
 
 app = Flask(__name__)
+init_auth(app)
 app.register_blueprint(logs_bp)
 app.register_blueprint(dashboard_bp)
 app.register_blueprint(reports_bp)
@@ -70,7 +72,7 @@ def auto_allocate(conn):
 
 @app.route("/")
 def home():
-    return redirect("/robots")
+    return redirect("/dashboard")
 
 
 @app.route("/robots")
@@ -182,3 +184,6 @@ def api_robots():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+# end of app.py
