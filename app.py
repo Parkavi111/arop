@@ -3,6 +3,7 @@ from flask import Flask, jsonify, redirect, render_template, request
 from auth import init_auth
 from dashboard import dashboard_bp
 from database import get_connection, init_db
+from edit import edit_bp
 from logs import logs_bp
 from reports import reports_bp
 from simulation import simulate_step
@@ -12,6 +13,7 @@ init_auth(app)
 app.register_blueprint(logs_bp)
 app.register_blueprint(dashboard_bp)
 app.register_blueprint(reports_bp)
+app.register_blueprint(edit_bp)
 init_db()
 
 VALID_PRIORITIES = ("low", "medium", "high")

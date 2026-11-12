@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Edit task - AROP{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-3">Edit task</h1>
+
+<form method="post" action="/tasks/{{ task.id }}/edit" class="row g-2">
+  <div class="col-auto">
+    <input type="text" name="title" class="form-control" value="{{ task.title }}" required>
+  </div>
+  <div class="col-auto">
+    <select name="priority" class="form-select">
+      <option value="low" {% if task.priority == "low" %}selected{% endif %}>low</option>
+      <option value="medium" {% if task.priority == "medium" %}selected{% endif %}>medium</option>
+      <option value="high" {% if task.priority == "high" %}selected{% endif %}>high</option>
+    </select>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-dark">Save</button>
+    <a href="/tasks" class="btn btn-outline-secondary">Cancel</a>
+  </div>
+</form>
+{% endblock %}
+
+{# end of edit_task.html #}

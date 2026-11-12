@@ -23,7 +23,7 @@
       <th>Status</th>
       <th>Assigned robot</th>
       <th>Assign</th>
-      <th>Delete</th>
+      <th>Actions</th>
     </tr>
   </thead>
   <tbody>
@@ -54,10 +54,13 @@
       </td>
       <td>
         {% if task.status == "pending" %}
-        <form method="post" action="/tasks/{{ task.id }}/delete"
-              onsubmit="return confirm('Delete {{ task.title }}?');">
-          <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-        </form>
+        <div class="d-flex gap-2">
+          <a href="/tasks/{{ task.id }}/edit" class="btn btn-sm btn-outline-light">Edit</a>
+          <form method="post" action="/tasks/{{ task.id }}/delete"
+                onsubmit="return confirm('Delete {{ task.title }}?');">
+            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+          </form>
+        </div>
         {% else %}
         -
         {% endif %}

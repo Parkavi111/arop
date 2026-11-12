@@ -9,7 +9,8 @@ A small web app that manages a fleet of **simulated** robots: register robots, c
 | Admin login and logout | Built |
 | Register robots (name only) and remove robots | Built |
 | View robots, status, battery, location | Built |
-| Create tasks with priority (low, medium, high), and delete pending tasks | Built |
+| Create tasks with priority (low, medium, high) | Built |
+| Edit and delete pending tasks | Built |
 | Manual task assignment | Built |
 | Automatic task allocation | Built |
 | Simulation (one step per button click) | Built, simplified (see limits) |
@@ -21,8 +22,8 @@ A small web app that manages a fleet of **simulated** robots: register robots, c
 
 ## What is not built
 
-- Editing a robot or a task after it is created
-- Deleting a task that is not pending (kept on purpose)
+- Editing a robot after it is created
+- Editing or deleting a task that is not pending (kept on purpose)
 - Robot capabilities in allocation (allocation uses status, battery and priority only)
 - Continuous or timed simulation (each click of the button runs one step)
 - Real map or coordinates (location is only `Base` or `Task site`)
@@ -36,7 +37,7 @@ A small web app that manages a fleet of **simulated** robots: register robots, c
 - Tables: `admin`, `robots`, `tasks`, `activity_logs`.
 - Manual assignment and automatic allocation use the same rules: the task must be `pending`, the robot must be `idle`, and the robot battery must be 20% or more.
 - Automatic allocation takes pending tasks in order (high, then medium, then low, older first) and gives each one the idle robot with the most battery. It stops when no robot is free.
-- Only a `pending` task can be deleted. Assigned, running and completed tasks are kept.
+- Only a `pending` task can be edited (title and priority) or deleted. Assigned, running and completed tasks are kept as they are.
 - Simulation step:
   - an `assigned` task becomes `in_progress`, the robot moves to `Task site`, battery drops 5%
   - an `in_progress` task becomes `completed`, the robot returns to `Base`, battery drops 10%
@@ -70,14 +71,15 @@ Run this command:
 
 Result on 12 Nov 2026 (Python 3.11.9, pytest 9.2.0):
 
-    30 passed in 7.27s
+    37 passed in 9.41s
 
-The tests use a throwaway database, never `arop.db`. They cover login and logout, the 20% battery limit, manual and automatic assignment, the simulation cycle, low-battery charging, removing robots, and deleting tasks.
+The tests use a throwaway database, never `arop.db`. They cover login and logout, the 20% battery limit, manual and automatic assignment, the simulation cycle, low-battery charging, removing robots, and editing and deleting tasks.
 
 ## Files
 
 - `app.py`: pages and routes for robots and tasks
 - `auth.py`: login, logout, page lock
+- `edit.py`: edit a pending task
 - `simulation.py`: simulation steps
 - `dashboard.py`, `reports.py`, `logs.py`: dashboard, report, activity log pages
 - `database.py`: database connection and tables
