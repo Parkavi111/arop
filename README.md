@@ -7,7 +7,7 @@ A small web app that manages a fleet of **simulated** robots: register robots, c
 | Feature | Status |
 | --- | --- |
 | Admin login and logout | Built |
-| Register robots (name only) and remove robots | Built |
+| Register, rename and remove robots | Built |
 | View robots, status, battery, location | Built |
 | Create tasks with priority (low, medium, high) | Built |
 | Edit and delete pending tasks | Built |
@@ -22,7 +22,7 @@ A small web app that manages a fleet of **simulated** robots: register robots, c
 
 ## What is not built
 
-- Editing a robot after it is created
+- Editing a robot's status, battery or location by hand (the simulation sets them)
 - Editing or deleting a task that is not pending (kept on purpose)
 - Robot capabilities in allocation (allocation uses status, battery and priority only)
 - Continuous or timed simulation (each click of the button runs one step)
@@ -38,6 +38,7 @@ A small web app that manages a fleet of **simulated** robots: register robots, c
 - Manual assignment and automatic allocation use the same rules: the task must be `pending`, the robot must be `idle`, and the robot battery must be 20% or more.
 - Automatic allocation takes pending tasks in order (high, then medium, then low, older first) and gives each one the idle robot with the most battery. It stops when no robot is free.
 - Only a `pending` task can be edited (title and priority) or deleted. Assigned, running and completed tasks are kept as they are.
+- A robot can be renamed at any time. The name cannot be empty and is cut at 50 characters. Status, battery and location do not change.
 - Simulation step:
   - an `assigned` task becomes `in_progress`, the robot moves to `Task site`, battery drops 5%
   - an `in_progress` task becomes `completed`, the robot returns to `Base`, battery drops 10%
@@ -71,15 +72,17 @@ Run this command:
 
 Result on 12 Nov 2026 (Python 3.11.9, pytest 9.2.0):
 
-    37 passed in 9.41s
+    45 passed in 16.11s
 
-The tests use a throwaway database, never `arop.db`. They cover login and logout, the 20% battery limit, manual and automatic assignment, the simulation cycle, low-battery charging, removing robots, and editing and deleting tasks.
+The tests use a throwaway database, never `arop.db`. They cover login and logout, the 20% battery limit, manual and automatic assignment, the simulation cycle, low-battery charging, removing and renaming robots, and editing and deleting tasks.
+
+Known issue: on two earlier runs, many tests reported setup errors, and a rerun passed. The cause is not known. If it happens, rerun with `pytest -q -x --tb=short` to see the first error.
 
 ## Files
 
 - `app.py`: pages and routes for robots and tasks
 - `auth.py`: login, logout, page lock
-- `edit.py`: edit a pending task
+- `edit.py`: edit a pending task, rename a robot
 - `simulation.py`: simulation steps
 - `dashboard.py`, `reports.py`, `logs.py`: dashboard, report, activity log pages
 - `database.py`: database connection and tables

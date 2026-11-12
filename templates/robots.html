@@ -12,7 +12,7 @@
       <th>Status</th>
       <th>Battery</th>
       <th>Location</th>
-      <th>Action</th>
+      <th>Actions</th>
     </tr>
   </thead>
   <tbody>
@@ -24,10 +24,13 @@
       <td>{{ robot.battery }}%</td>
       <td>{{ robot.location }}</td>
       <td>
-        <form method="post" action="/robots/{{ robot.id }}/delete"
-              onsubmit="return confirm('Remove {{ robot.name }}?');">
-          <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
-        </form>
+        <div class="d-flex gap-2">
+          <a href="/robots/{{ robot.id }}/edit" class="btn btn-sm btn-outline-light">Rename</a>
+          <form method="post" action="/robots/{{ robot.id }}/delete"
+                onsubmit="return confirm('Remove {{ robot.name }}?');">
+            <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+          </form>
+        </div>
       </td>
     </tr>
     {% endfor %}
@@ -44,3 +47,5 @@
   </div>
 </form>
 {% endblock %}
+
+{# end of robots.html #}

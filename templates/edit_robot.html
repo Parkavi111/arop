@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Rename robot - AROP{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-3">Rename robot</h1>
+
+<form method="post" action="/robots/{{ robot.id }}/edit" class="row g-2">
+  <div class="col-auto">
+    <input type="text" name="name" class="form-control" value="{{ robot.name }}" maxlength="50" required>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-dark">Save</button>
+    <a href="/robots" class="btn btn-outline-secondary">Cancel</a>
+  </div>
+</form>
+{% endblock %}
+
+{# end of edit_robot.html #}
