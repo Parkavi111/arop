@@ -148,6 +148,17 @@ def add_task():
     return redirect("/tasks")
 
 
+@app.route("/tasks/<int:task_id>/delete", methods=["POST"])
+def delete_task(task_id):
+    conn = get_connection()
+    conn.execute(
+        "DELETE FROM tasks WHERE id = ? AND status = 'pending'", (task_id,)
+    )
+    conn.commit()
+    conn.close()
+    return redirect("/tasks")
+
+
 @app.route("/tasks/<int:task_id>/assign", methods=["POST"])
 def assign_task_route(task_id):
     robot_id = request.form.get("robot_id", type=int)
