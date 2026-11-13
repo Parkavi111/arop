@@ -16,7 +16,7 @@
   <tbody>
     {% for log in logs %}
     <tr>
-      <td>{{ log.timestamp }}</td>
+      <td>{{ log.timestamp|ist }}</td>
       <td>{{ log.robot_name or "-" }}</td>
       <td>{{ log.task_title or "-" }}</td>
       <td>{{ log.event }}</td>

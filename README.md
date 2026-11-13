@@ -16,7 +16,7 @@ A small web app that manages a fleet of **simulated** robots: register robots, c
 | Simulation (one step per button click) | Built, simplified (see limits) |
 | Battery drain, charging | Built |
 | Task completion tracking | Built |
-| Activity logs | Built |
+| Activity logs, shown in India time (UTC+5:30) | Built |
 | Fleet dashboard | Built |
 | Task report | Built |
 | Cross-site request check (Origin and Referer) | Built, partial (see limits) |
@@ -30,12 +30,13 @@ A small web app that manages a fleet of **simulated** robots: register robots, c
 - Real map or coordinates (location is only `Base` or `Task site`)
 - Report export (CSV or PDF)
 - CSRF tokens in forms. Instead, the app rejects a button press (POST) whose `Origin` or `Referer` is another website, and the login cookie uses `SameSite=Lax`. A request with no `Origin` and no `Referer` header is allowed, which mainly affects old browsers and tools.
-- Local time in logs (times are shown in UTC)
+- Other time zones (log times are shown in India time only)
 
 ## How it works
 
 - Backend: Python, Flask. Database: SQLite (`arop.db`, created locally, not stored in Git).
 - Tables: `admin`, `robots`, `tasks`, `activity_logs`.
+- Times are stored in UTC and converted to India Standard Time (UTC+5:30) only when a page shows them.
 - Manual assignment and automatic allocation use the same rules: the task must be `pending`, the robot must be `idle`, and the robot battery must be 20% or more.
 - Automatic allocation takes pending tasks in order (high, then medium, then low, older first) and gives each one the idle robot with the most battery. It stops when no robot is free.
 - Only a `pending` task can be edited (title and priority) or deleted. Assigned, running and completed tasks are kept as they are.
@@ -73,9 +74,9 @@ Run this command:
 
 Result on 13 Nov 2026 (Python 3.11.9, pytest 9.2.0):
 
-    51 passed in 16.65s
+    57 passed in 17.73s
 
-The tests use a throwaway database, never `arop.db`. They cover login and logout, the 20% battery limit, manual and automatic assignment, the simulation cycle, low-battery charging, removing and renaming robots, editing and deleting tasks, and rejecting button presses from other websites.
+The tests use a throwaway database, never `arop.db`. They cover login and logout, the 20% battery limit, manual and automatic assignment, the simulation cycle, low-battery charging, removing and renaming robots, editing and deleting tasks, rejecting button presses from other websites, and the conversion of log times to India time.
 
 Known issue: on two earlier runs, many tests reported setup errors, and a rerun passed. The cause is not known. If it happens, rerun with `pytest -q -x --tb=short` to see the first error.
 
@@ -85,7 +86,8 @@ Known issue: on two earlier runs, many tests reported setup errors, and a rerun 
 - `auth.py`: login, logout, page lock, Origin and Referer check
 - `edit.py`: edit a pending task, rename a robot
 - `simulation.py`: simulation steps
-- `dashboard.py`, `reports.py`, `logs.py`: dashboard, report, activity log pages
+- `timeutil.py`: converts UTC times to India time
+- `dashboard.py`, `reports.py`, `logs.py`: dashboard, report, activity log pages (`logs.py` also provides the `ist` time filter)
 - `database.py`: database connection and tables
 - `seed.py`, `create_admin.py`: setup scripts
 - `templates/`: HTML pages

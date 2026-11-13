@@ -1,8 +1,14 @@
 from flask import Blueprint, render_template
 
 from database import get_connection
+from timeutil import to_ist
 
 logs_bp = Blueprint("logs", __name__)
+
+
+@logs_bp.app_template_filter("ist")
+def ist_filter(value):
+    return to_ist(value)
 
 
 @logs_bp.route("/logs")
