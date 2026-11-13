@@ -19,6 +19,7 @@ A small web app that manages a fleet of **simulated** robots: register robots, c
 | Activity logs | Built |
 | Fleet dashboard | Built |
 | Task report | Built |
+| Cross-site request check (Origin and Referer) | Built, partial (see limits) |
 
 ## What is not built
 
@@ -28,7 +29,7 @@ A small web app that manages a fleet of **simulated** robots: register robots, c
 - Continuous or timed simulation (each click of the button runs one step)
 - Real map or coordinates (location is only `Base` or `Task site`)
 - Report export (CSV or PDF)
-- CSRF protection on forms
+- CSRF tokens in forms. Instead, the app rejects a button press (POST) whose `Origin` or `Referer` is another website, and the login cookie uses `SameSite=Lax`. A request with no `Origin` and no `Referer` header is allowed, which mainly affects old browsers and tools.
 - Local time in logs (times are shown in UTC)
 
 ## How it works
@@ -70,18 +71,18 @@ Run this command:
 
     pytest -q
 
-Result on 12 Nov 2026 (Python 3.11.9, pytest 9.2.0):
+Result on 13 Nov 2026 (Python 3.11.9, pytest 9.2.0):
 
-    45 passed in 16.11s
+    51 passed in 16.65s
 
-The tests use a throwaway database, never `arop.db`. They cover login and logout, the 20% battery limit, manual and automatic assignment, the simulation cycle, low-battery charging, removing and renaming robots, and editing and deleting tasks.
+The tests use a throwaway database, never `arop.db`. They cover login and logout, the 20% battery limit, manual and automatic assignment, the simulation cycle, low-battery charging, removing and renaming robots, editing and deleting tasks, and rejecting button presses from other websites.
 
 Known issue: on two earlier runs, many tests reported setup errors, and a rerun passed. The cause is not known. If it happens, rerun with `pytest -q -x --tb=short` to see the first error.
 
 ## Files
 
 - `app.py`: pages and routes for robots and tasks
-- `auth.py`: login, logout, page lock
+- `auth.py`: login, logout, page lock, Origin and Referer check
 - `edit.py`: edit a pending task, rename a robot
 - `simulation.py`: simulation steps
 - `dashboard.py`, `reports.py`, `logs.py`: dashboard, report, activity log pages

@@ -1,12 +1,24 @@
 import os
 import secrets
+from urllib.parse import urlparse
 
-from flask import Blueprint, redirect, render_template, request, session
+from flask import Blueprint, abort, redirect, render_template, request, session
 from werkzeug.security import check_password_hash
 
 from database import get_connection
 
 auth_bp = Blueprint("auth", __name__)
+
+UNSAFE_METHODS = ("POST", "PUT", "PATCH", "DELETE")
+
+
+def check_origin():
+    if request.method not in UNSAFE_METHODS:
+        return None
+    source = request.headers.get("Origin") or request.headers.get("Referer")
+    if source and urlparse(source).netloc != request.host:
+        abort(403)
+    return None
 
 
 def require_login():
@@ -46,6 +58,7 @@ def init_auth(app):
     app.secret_key = os.environ.get("AROP_SECRET_KEY") or secrets.token_hex(32)
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
     app.register_blueprint(auth_bp)
+    app.before_request(check_origin)
     app.before_request(require_login)
 
 
