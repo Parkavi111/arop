@@ -5,6 +5,7 @@ from database import get_connection
 edit_bp = Blueprint("edit", __name__)
 
 VALID_PRIORITIES = ("low", "medium", "high")
+CAPABILITIES = ("light", "heavy")
 MAX_NAME_LENGTH = 50
 
 
@@ -23,11 +24,14 @@ def edit_task(task_id):
         priority = request.form.get("priority", "medium")
         if priority not in VALID_PRIORITIES:
             priority = "medium"
+        required = request.form.get("required_capability", task["required_capability"])
+        if required not in CAPABILITIES:
+            required = "light"
         if title:
             conn.execute(
-                "UPDATE tasks SET title = ?, priority = ? "
+                "UPDATE tasks SET title = ?, priority = ?, required_capability = ? "
                 "WHERE id = ? AND status = 'pending'",
-                (title, priority, task_id),
+                (title, priority, required, task_id),
             )
             conn.commit()
             conn.close()

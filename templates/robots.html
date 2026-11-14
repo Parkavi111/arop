@@ -9,6 +9,7 @@
     <tr>
       <th>ID</th>
       <th>Name</th>
+      <th>Capability</th>
       <th>Status</th>
       <th>Battery</th>
       <th>Location</th>
@@ -20,6 +21,7 @@
     <tr>
       <td>{{ robot.id }}</td>
       <td>{{ robot.name }}</td>
+      <td>{{ robot.capability }}</td>
       <td>{{ robot.status }}</td>
       <td>{{ robot.battery }}%</td>
       <td>{{ robot.location }}</td>
@@ -41,6 +43,12 @@
 <form method="post" action="/robots/add" class="row g-2">
   <div class="col-auto">
     <input type="text" name="name" class="form-control" placeholder="Robot name" required>
+  </div>
+  <div class="col-auto">
+    <select name="capability" class="form-select">
+      <option value="light" selected>light</option>
+      <option value="heavy">heavy</option>
+    </select>
   </div>
   <div class="col-auto">
     <button type="submit" class="btn btn-dark">Add robot</button>

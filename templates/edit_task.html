@@ -16,6 +16,12 @@
     </select>
   </div>
   <div class="col-auto">
+    <select name="required_capability" class="form-select">
+      <option value="light" {% if task.required_capability == "light" %}selected{% endif %}>needs light</option>
+      <option value="heavy" {% if task.required_capability == "heavy" %}selected{% endif %}>needs heavy</option>
+    </select>
+  </div>
+  <div class="col-auto">
     <button type="submit" class="btn btn-dark">Save</button>
     <a href="/tasks" class="btn btn-outline-secondary">Cancel</a>
   </div>

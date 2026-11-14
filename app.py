@@ -17,7 +17,12 @@ app.register_blueprint(edit_bp)
 init_db()
 
 VALID_PRIORITIES = ("low", "medium", "high")
+CAPABILITIES = ("light", "heavy")
 MIN_BATTERY = 20
+
+
+def can_do(robot_capability, required):
+    return robot_capability == "heavy" or required == "light"
 
 
 def assign_task(conn, task_id, robot_id):
@@ -28,6 +33,8 @@ def assign_task(conn, task_id, robot_id):
     if task["status"] != "pending":
         return False
     if robot["status"] != "idle" or robot["battery"] < MIN_BATTERY:
+        return False
+    if not can_do(robot["capability"], task["required_capability"]):
         return False
     conn.execute(
         "UPDATE tasks SET status = 'assigned', assigned_robot_id = ? WHERE id = ?",
@@ -46,7 +53,7 @@ def auto_allocate(conn):
     assigned_count = 0
     pending = conn.execute(
         """
-        SELECT id FROM tasks
+        SELECT id, required_capability FROM tasks
         WHERE status = 'pending'
         ORDER BY CASE priority
                      WHEN 'high' THEN 1
@@ -60,13 +67,15 @@ def auto_allocate(conn):
             """
             SELECT id FROM robots
             WHERE status = 'idle' AND battery >= ?
-            ORDER BY battery DESC, id
+              AND (capability = 'heavy' OR ? = 'light')
+            ORDER BY CASE capability WHEN 'light' THEN 1 ELSE 2 END,
+                     battery DESC, id
             LIMIT 1
             """,
-            (MIN_BATTERY,),
+            (MIN_BATTERY, task["required_capability"]),
         ).fetchone()
         if robot is None:
-            break
+            continue
         if assign_task(conn, task["id"], robot["id"]):
             assigned_count += 1
     return assigned_count
@@ -88,9 +97,15 @@ def robots_page():
 @app.route("/robots/add", methods=["POST"])
 def add_robot():
     name = request.form.get("name", "").strip()
+    capability = request.form.get("capability", "light")
+    if capability not in CAPABILITIES:
+        capability = "light"
     if name:
         conn = get_connection()
-        conn.execute("INSERT INTO robots (name) VALUES (?)", (name,))
+        conn.execute(
+            "INSERT INTO robots (name, capability) VALUES (?, ?)",
+            (name, capability),
+        )
         conn.commit()
         conn.close()
     return redirect("/robots")
@@ -139,11 +154,15 @@ def add_task():
     priority = request.form.get("priority", "medium")
     if priority not in VALID_PRIORITIES:
         priority = "medium"
+    required = request.form.get("required_capability", "light")
+    if required not in CAPABILITIES:
+        required = "light"
     if title:
         conn = get_connection()
         conn.execute(
-            "INSERT INTO tasks (title, priority) VALUES (?, ?)",
-            (title, priority),
+            "INSERT INTO tasks (title, priority, required_capability) "
+            "VALUES (?, ?, ?)",
+            (title, priority, required),
         )
         conn.commit()
         conn.close()

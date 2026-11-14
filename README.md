@@ -7,12 +7,13 @@ A small web app that manages a fleet of **simulated** robots: register robots, c
 | Feature | Status |
 | --- | --- |
 | Admin login and logout | Built |
-| Register, rename and remove robots | Built |
-| View robots, status, battery, location | Built |
-| Create tasks with priority (low, medium, high) | Built |
+| Register (light or heavy), rename and remove robots | Built |
+| View robots, capability, status, battery, location | Built |
+| Create tasks with priority and required capability | Built |
 | Edit and delete pending tasks | Built |
 | Manual task assignment | Built |
 | Automatic task allocation | Built |
+| Capability matching (light and heavy) | Built |
 | Simulation (one step per button click) | Built, simplified (see limits) |
 | Battery drain, charging | Built |
 | Task completion tracking | Built |
@@ -23,9 +24,9 @@ A small web app that manages a fleet of **simulated** robots: register robots, c
 
 ## What is not built
 
+- Changing a robot's capability after it is registered
 - Editing a robot's status, battery or location by hand (the simulation sets them)
 - Editing or deleting a task that is not pending (kept on purpose)
-- Robot capabilities in allocation (allocation uses status, battery and priority only)
 - Continuous or timed simulation (each click of the button runs one step)
 - Real map or coordinates (location is only `Base` or `Task site`)
 - Report export (CSV or PDF)
@@ -35,11 +36,12 @@ A small web app that manages a fleet of **simulated** robots: register robots, c
 ## How it works
 
 - Backend: Python, Flask. Database: SQLite (`arop.db`, created locally, not stored in Git).
-- Tables: `admin`, `robots`, `tasks`, `activity_logs`.
+- Tables: `admin`, `robots`, `tasks`, `activity_logs`. On start, `init_db` adds the `capability` and `required_capability` columns to an older database if they are missing.
 - Times are stored in UTC and converted to India Standard Time (UTC+5:30) only when a page shows them.
-- Manual assignment and automatic allocation use the same rules: the task must be `pending`, the robot must be `idle`, and the robot battery must be 20% or more.
-- Automatic allocation takes pending tasks in order (high, then medium, then low, older first) and gives each one the idle robot with the most battery. It stops when no robot is free.
-- Only a `pending` task can be edited (title and priority) or deleted. Assigned, running and completed tasks are kept as they are.
+- Capability rule: a `heavy` robot can do heavy and light tasks, a `light` robot can only do light tasks.
+- Manual assignment and automatic allocation use the same rules: the task must be `pending`, the robot must be `idle`, the robot battery must be 20% or more, and the robot capability must fit the task.
+- Automatic allocation takes pending tasks in order (high, then medium, then low, older first). For each task it picks a fitting idle robot, light robots first, then the one with the most battery. A task with no fitting robot stays pending and the next task is tried.
+- Only a `pending` task can be edited (title, priority, required capability) or deleted. Assigned, running and completed tasks are kept as they are.
 - A robot can be renamed at any time. The name cannot be empty and is cut at 50 characters. Status, battery and location do not change.
 - Simulation step:
   - an `assigned` task becomes `in_progress`, the robot moves to `Task site`, battery drops 5%
@@ -72,23 +74,23 @@ Run this command:
 
     pytest -q
 
-Result on 13 Nov 2026 (Python 3.11.9, pytest 9.2.0):
+Result on 14 Nov 2026 (Python 3.11.9, pytest 9.2.0):
 
-    57 passed in 17.73s
+    67 passed in 19.34s
 
-The tests use a throwaway database, never `arop.db`. They cover login and logout, the 20% battery limit, manual and automatic assignment, the simulation cycle, low-battery charging, removing and renaming robots, editing and deleting tasks, rejecting button presses from other websites, and the conversion of log times to India time.
+The tests use a throwaway database, never `arop.db`. They cover login and logout, the 20% battery limit, manual and automatic assignment, capability matching, the simulation cycle, low-battery charging, removing and renaming robots, editing and deleting tasks, rejecting button presses from other websites, and the conversion of log times to India time.
 
 Known issue: on two earlier runs, many tests reported setup errors, and a rerun passed. The cause is not known. If it happens, rerun with `pytest -q -x --tb=short` to see the first error.
 
 ## Files
 
-- `app.py`: pages and routes for robots and tasks
+- `app.py`: pages and routes for robots and tasks, assignment rules
 - `auth.py`: login, logout, page lock, Origin and Referer check
 - `edit.py`: edit a pending task, rename a robot
 - `simulation.py`: simulation steps
 - `timeutil.py`: converts UTC times to India time
 - `dashboard.py`, `reports.py`, `logs.py`: dashboard, report, activity log pages (`logs.py` also provides the `ist` time filter)
-- `database.py`: database connection and tables
+- `database.py`: database connection, tables, column upgrade
 - `seed.py`, `create_admin.py`: setup scripts
 - `templates/`: HTML pages
 - `tests/`, `pytest.ini`: tests

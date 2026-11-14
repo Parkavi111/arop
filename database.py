@@ -12,6 +12,12 @@ def get_connection():
     return conn
 
 
+def ensure_column(conn, table, column, definition):
+    existing = [row["name"] for row in conn.execute(f"PRAGMA table_info({table})")]
+    if column not in existing:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
+
+
 def init_db():
     conn = get_connection()
     conn.executescript("""
@@ -26,7 +32,8 @@ def init_db():
         name TEXT NOT NULL,
         status TEXT NOT NULL DEFAULT 'idle',
         battery INTEGER NOT NULL DEFAULT 100,
-        location TEXT NOT NULL DEFAULT 'Base'
+        location TEXT NOT NULL DEFAULT 'Base',
+        capability TEXT NOT NULL DEFAULT 'light'
     );
 
     CREATE TABLE IF NOT EXISTS tasks (
@@ -35,6 +42,7 @@ def init_db():
         priority TEXT NOT NULL DEFAULT 'medium',
         status TEXT NOT NULL DEFAULT 'pending',
         assigned_robot_id INTEGER,
+        required_capability TEXT NOT NULL DEFAULT 'light',
         FOREIGN KEY (assigned_robot_id) REFERENCES robots (id)
     );
 
@@ -48,6 +56,8 @@ def init_db():
         FOREIGN KEY (task_id) REFERENCES tasks (id)
     );
     """)
+    ensure_column(conn, "robots", "capability", "TEXT NOT NULL DEFAULT 'light'")
+    ensure_column(conn, "tasks", "required_capability", "TEXT NOT NULL DEFAULT 'light'")
     conn.commit()
     conn.close()
 
@@ -55,3 +65,6 @@ def init_db():
 if __name__ == "__main__":
     init_db()
     print("Database created: arop.db")
+
+
+# end of database.py
